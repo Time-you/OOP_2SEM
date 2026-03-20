@@ -1,0 +1,198 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+using namespace std;
+
+class Person {
+protected:
+    string name;
+public:
+    Person(string n) : name(n) {}
+    virtual ~Person() {}
+
+    virtual void show() = 0;
+};
+
+class Account {
+    int id;
+    double balance;
+    bool active;
+public:
+    Account(int i = 0, double b = 0) : id(i), balance(b), active(true) {}
+
+    bool withdraw(double sum) {
+        if (sum > balance || !active) return false;
+        balance -= sum;
+        return true;
+    }
+
+    void deposit(double sum) { balance += sum; }
+
+    void block() { active = false; }
+
+    int getId() const { return id; }
+    double getBalance() const { return balance; }
+
+    void show() {
+        cout << "Account ID: " << id << " Balance: " << balance << endl;
+    }
+};
+
+class Card {
+    int number;
+    bool blocked;
+public:
+    Card(int n = 0) : number(n), blocked(false) {}
+
+    void block() { blocked = true; }
+
+    bool isBlocked() const { return blocked; }
+
+    int getNumber() const { return number; }
+
+    void show() {
+        cout << "Card: " << number << " Blocked: " << blocked << endl;
+    }
+};
+
+class Client : public Person {
+    Account account;
+    Card card;
+
+public:
+    Client(string n, Account acc, Card c)
+        : Person(n), account(acc), card(c) {}
+
+    void show() override {
+        cout << "\nClient: " << name << endl;
+        account.show();
+        card.show();
+    }
+
+    Account& getAccount() { return account; }
+    Card& getCard() { return card; }
+};
+
+class Admin : public Person {
+public:
+    Admin(string n) : Person(n) {}
+
+    void show() override {
+        cout << "Admin: " << name << endl;
+    }
+
+    void blockCard(Client& c) {
+        c.getCard().block();
+        cout << "Card blocked by admin!\n";
+    }
+};
+
+class BankSystem {
+    vector<Client> clients;
+
+public:
+    void initData() {
+        for (int i = 0; i < 10; i++) {
+            clients.push_back(Client(
+                "Client" + to_string(i),
+                Account(i, 1000 + i * 100),
+                Card(1000 + i)
+            ));
+        }
+    }
+
+    void showClients() {
+        for (auto& c : clients)
+            c.show();
+    }
+
+    void makePayment(int from, int to, double sum) {
+        for (auto& c : clients) {
+            if (c.getAccount().getId() == from) {
+
+                if (c.getCard().isBlocked()) {
+                    cout << "Card is blocked!\n";
+                    return;
+                }
+
+                if (c.getAccount().withdraw(sum)) {
+                    for (auto& d : clients) {
+                        if (d.getAccount().getId() == to) {
+                            d.getAccount().deposit(sum);
+                            cout << "Payment successful!\n";
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        cout << "Payment failed!\n";
+    }
+
+    void save() {
+        ofstream f("db.txt");
+        for (auto& c : clients) {
+            f << c.getAccount().getId() << " "
+              << c.getAccount().getBalance() << endl;
+        }
+        cout << "Saved to file!\n";
+    }
+
+    Client& getClient(int index) {
+        return clients[index];
+    }
+
+    int size() const {
+        return clients.size();
+    }
+};
+
+int main() {
+    BankSystem bank;
+    bank.initData();
+
+    Admin admin("Admin");
+
+    int choice;
+
+    do {
+        cout << "\n===== MENU =====\n";
+        cout << "1. Show clients\n";
+        cout << "2. Make payment\n";
+        cout << "3. Block card (admin)\n";
+        cout << "4. Save DB\n";
+        cout << "0. Exit\n";
+        cin >> choice;
+
+        if (choice == 1) {
+            bank.showClients();
+        }
+        else if (choice == 2) {
+            int from, to;
+            double sum;
+
+            cout << "From account: ";
+            cin >> from;
+            cout << "To account: ";
+            cin >> to;
+            cout << "Amount: ";
+            cin >> sum;
+
+            bank.makePayment(from, to, sum);
+        }
+        else if (choice == 3) {
+            int id;
+            cout << "Enter client index (0-9): ";
+            cin >> id;
+
+            if (id >= 0 && id < bank.size())
+                admin.blockCard(bank.getClient(id));
+        }
+        else if (choice == 4) {
+            bank.save();
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
