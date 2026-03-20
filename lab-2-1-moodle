@@ -1,0 +1,58 @@
+#include <iostream>
+using namespace std;
+
+class Base {
+protected:
+    int x;
+public:
+    Base(int v = 1) : x(v) {
+        cout << "Base created\n";
+    }
+    ~Base() {
+        cout << "Base destroyed\n";
+    }
+};
+
+class A : public Base {
+public:
+    A() { cout << "A created\n"; }
+};
+
+class B : public Base {
+public:
+    B() { cout << "B created\n"; }
+};
+
+class C : public A, public B {
+public:
+    C() { cout << "C created\n"; }
+};
+
+class AV : virtual public Base {
+public:
+    AV() { cout << "AV created\n"; }
+};
+
+class BV : virtual public Base {
+public:
+    BV() { cout << "BV created\n"; }
+};
+
+class CV : public AV, public BV {
+public:
+    CV() { cout << "CV created\n"; }
+};
+
+int main() {
+    cout << "WITHOUT VIRTUAL\n";
+    C obj1;
+
+    cout << "Size C = " << sizeof(C) << endl;
+
+    cout << "\nWITH VIRTUAL\n";
+    CV obj2;
+
+    cout << "Size CV = " << sizeof(CV) << endl;
+
+    return 0;
+}
