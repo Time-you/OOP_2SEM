@@ -1,1 +1,196 @@
+#include <iostream>
+#include <cmath>
+#include <string>
+using namespace std;
 
+class Color {
+    string color;
+
+public:
+    Color() {
+        color = "white";
+        cout << "Default constructor Color\n";
+    }
+
+    Color(string c) {
+        color = c;
+        cout << "Constructor Color(string)\n";
+    }
+
+    ~Color() {
+        cout << "Destructor Color\n";
+    }
+
+    void setColor(string c) { color = c; }
+
+    string toString() {
+        return "Color: " + color;
+    }
+
+    void Input() {
+        cout << "Input color: ";
+        cin >> color;
+    }
+};
+
+class Point {
+protected:
+    double x, y;
+    Color color; // КОМПОЗИЦІЯ
+
+public:
+    Point() {
+        x = 0; y = 0;
+        cout << "Default constructor Point\n";
+    }
+
+    Point(double _x, double _y, string c) : color(c) {
+        x = _x; y = _y;
+        cout << "Constructor Point(x,y,color)\n";
+    }
+
+    virtual ~Point() {
+        cout << "Destructor Point\n";
+    }
+
+    virtual string toString() {
+        return "Point: (" + to_string(x) + ", " + to_string(y) + ") "
+            + color.toString();
+    }
+
+    virtual void Input() {
+        cout << "Input x: "; cin >> x;
+        cout << "Input y: "; cin >> y;
+        color.Input();
+    }
+
+    virtual void Output() {
+        cout << toString() << endl;
+    }
+};
+
+class Ellipse : public Point {
+protected:
+    double a, b;
+
+public:
+    Ellipse() : Point() {
+        a = 0; b = 0;
+        cout << "Default constructor Ellipse\n";
+    }
+
+    Ellipse(double _x, double _y, double _a, double _b, string c)
+        : Point(_x, _y, c) {
+        a = _a; b = _b;
+        cout << "Constructor Ellipse\n";
+    }
+
+    ~Ellipse() {
+        cout << "Destructor Ellipse\n";
+    }
+
+    double area() {
+        return M_PI * a * b;
+    }
+
+    string toString() override {
+        return Point::toString() +
+            " Ellipse a=" + to_string(a) +
+            " b=" + to_string(b) +
+            " Area=" + to_string(area());
+    }
+
+    void Input() override {
+        Point::Input();
+        cout << "Input a: "; cin >> a;
+        cout << "Input b: "; cin >> b;
+    }
+};
+
+class Circle : public Ellipse {
+public:
+    Circle() : Ellipse() {
+        cout << "Default constructor Circle\n";
+    }
+
+    Circle(double _x, double _y, double r, string c)
+        : Ellipse(_x, _y, r, r, c) {
+        cout << "Constructor Circle\n";
+    }
+
+    ~Circle() {
+        cout << "Destructor Circle\n";
+    }
+
+    double area() {
+        return M_PI * a * a;
+    }
+
+    string toString() override {
+        return Point::toString() +
+            " Circle r=" + to_string(a) +
+            " Area=" + to_string(area());
+    }
+
+    void setRadius(double r) {
+        a = b = r;
+    }
+
+    void Input() override {
+        Point::Input();
+        cout << "Input radius: "; cin >> a;
+        b = a;
+    }
+};
+
+int main() {
+    char choice;
+
+    do {
+        cout << "\nMENU:\n";
+        cout << "1 - Default Point\n";
+        cout << "2 - Input Ellipse\n";
+        cout << "3 - Constructor Circle\n";
+        cout << "4 - Change radius\n";
+        cout << "q - Quit\n";
+        cout << "Choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case '1': {
+            Point p;
+            p.Output();
+            break;
+        }
+        case '2': {
+            Ellipse e;
+            e.Input();
+            e.Output();
+            break;
+        }
+        case '3': {
+            Circle c(1, 2, 5, "red");
+            c.Output();
+            break;
+        }
+        case '4': {
+            Circle c;
+            c.Input();
+            double r;
+            cout << "New radius: ";
+            cin >> r;
+            c.setRadius(r);
+            c.Output();
+            break;
+        }
+        case 'q':
+            break;
+        default:
+            cout << "Wrong choice\n";
+        }
+
+    } while (choice != 'q');
+
+    cout << "Exit program\n";
+    return 0;
+}
