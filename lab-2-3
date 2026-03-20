@@ -1,0 +1,67 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Worker {
+protected:
+    string name;
+    double salary;
+public:
+    Worker(string n = "Noname", double s = 0) : name(n), salary(s) {}
+    virtual ~Worker() {}
+
+    friend ostream& operator<<(ostream& os, const Worker& w) {
+        os << "Name: " << w.name << ", Salary: " << w.salary;
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, Worker& w) {
+        cout << "Enter name: ";
+        is >> w.name;
+        cout << "Enter salary: ";
+        is >> w.salary;
+        return is;
+    }
+};
+
+class Father {
+protected:
+    int children;
+public:
+    Father(int c = 0) : children(c) {}
+    virtual ~Father() {}
+
+    friend ostream& operator<<(ostream& os, const Father& f) {
+        os << "Children: " << f.children;
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, Father& f) {
+        cout << "Enter number of children: ";
+        is >> f.children;
+        return is;
+    }
+};
+
+class WorkerFather : public Worker, public Father {
+public:
+    WorkerFather(string n = "Noname", double s = 0, int c = 0)
+        : Worker(n, s), Father(c) {}
+
+    void show() {
+        cout << "Worker-Father info:\n";
+        cout << (Worker&)(*this) << endl;
+        cout << (Father&)(*this) << endl;
+    }
+};
+
+int main() {
+    WorkerFather wf;
+
+    cin >> (Worker&)wf;
+    cin >> (Father&)wf;
+
+    wf.show();
+
+    return 0;
+}
