@@ -1,0 +1,179 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class MyString {
+protected:
+    char* str;
+
+public:
+    MyString() {
+        str = nullptr;
+        cout << "MyString default constructor\n";
+    }
+
+    MyString(const char* s) {
+        if (s) {
+            str = new char[strlen(s) + 1];
+            strcpy(str, s);
+        } else str = nullptr;
+        cout << "MyString constructor(const char*)\n";
+    }
+
+    MyString(const MyString& other) {
+        if (other.str) {
+            str = new char[strlen(other.str) + 1];
+            strcpy(str, other.str);
+        } else str = nullptr;
+        cout << "MyString copy constructor\n";
+    }
+
+    MyString(MyString&& other) {
+        str = other.str;
+        other.str = nullptr;
+        cout << "MyString move constructor\n";
+    }
+
+    MyString& operator=(const MyString& other) {
+        if (this != &other) {
+            delete[] str;
+            if (other.str) {
+                str = new char[strlen(other.str) + 1];
+                strcpy(str, other.str);
+            } else str = nullptr;
+        }
+        cout << "MyString operator=\n";
+        return *this;
+    }
+
+    MyString& operator=(MyString&& other) {
+        if (this != &other) {
+            delete[] str;
+            str = other.str;
+            other.str = nullptr;
+        }
+        cout << "MyString move operator=\n";
+        return *this;
+    }
+
+    virtual ~MyString() {
+        delete[] str;
+        cout << "MyString destructor\n";
+    }
+
+    friend ostream& operator<<(ostream& os, const MyString& s) {
+        if (s.str)
+            os << s.str;
+        else
+            os << "Empty";
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, MyString& s) {
+        char buffer[100];
+        is >> buffer;
+
+        delete[] s.str;
+        s.str = new char[strlen(buffer) + 1];
+        strcpy(s.str, buffer);
+
+        return is;
+    }
+};
+
+class DigitString : public MyString {
+
+    bool isDigits(const char* s) {
+        for (int i = 0; s[i]; i++)
+            if (!isdigit(s[i])) return false;
+        return true;
+    }
+
+public:
+    DigitString() : MyString() {
+        cout << "DigitString default constructor\n";
+    }
+
+    DigitString(const char* s) : MyString(s) {
+        if (s && !isDigits(s)) {
+            delete[] str;
+            str = nullptr;
+            cout << "Error: not only digits!\n";
+        }
+        cout << "DigitString constructor\n";
+    }
+
+    DigitString(const DigitString& other) : MyString(other) {
+        cout << "DigitString copy constructor\n";
+    }
+
+    DigitString(DigitString&& other) : MyString(move(other)) {
+        cout << "DigitString move constructor\n";
+    }
+
+    DigitString& operator=(const DigitString& other) {
+        MyString::operator=(other);
+        cout << "DigitString operator=\n";
+        return *this;
+    }
+
+    DigitString& operator=(DigitString&& other) {
+        MyString::operator=(move(other));
+        cout << "DigitString move operator=\n";
+        return *this;
+    }
+
+    ~DigitString() {
+        cout << "DigitString destructor\n";
+    }
+
+    friend istream& operator>>(istream& is, DigitString& s) {
+        char buffer[100];
+        is >> buffer;
+
+        if (!s.isDigits(buffer)) {
+            cout << "Error: only digits allowed!\n";
+            return is;
+        }
+
+        delete[] s.str;
+        s.str = new char[strlen(buffer) + 1];
+        strcpy(s.str, buffer);
+
+        return is;
+    }
+
+    friend ostream& operator<<(ostream& os, const DigitString& s) {
+        if (s.str)
+            os << "DigitString: " << s.str;
+        else
+            os << "Empty DigitString";
+        return os;
+    }
+};
+
+int main() {
+    setlocale(LC_ALL, "");
+
+    cout << "=== TEST ===\n";
+
+    DigitString a("12345");
+    cout << a << endl;
+
+    DigitString b = a; 
+    cout << b << endl;
+
+    DigitString c;
+    c = a; 
+    cout << c << endl;
+
+    DigitString d = DigitString("999"); 
+    cout << d << endl;
+
+    cout << "Input digit string: ";
+    DigitString x;
+    cin >> x;
+    cout << x << endl;
+
+    return 0;
+}
