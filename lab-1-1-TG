@@ -1,0 +1,82 @@
+using System;
+
+class Airplane
+{
+    public string Name;
+    public string Manufacturer;
+    public int Capacity;
+    public double Range;
+    public double Speed;
+    public bool HasAutopilot;
+    public bool IsMilitary;
+
+    public double GetRangePerPassenger()
+    {
+        return Range / Capacity;
+    }
+}
+
+
+
+
+
+
+
+
+
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Введіть назву літака: ");
+        string name = Console.ReadLine();
+
+        Console.Write("Введіть виробника: ");
+        string manufacturer = Console.ReadLine();
+
+        Console.Write("Введіть місткість (пасажири): ");
+        string capacity = Console.ReadLine();
+
+        Console.Write("Введіть дальність польоту (км): ");
+        string range = Console.ReadLine();
+
+        Console.Write("Введіть швидкість (км/год): ");
+        string speed = Console.ReadLine();
+
+        Console.Write("Чи є автопілот? (y-так, n-ні): ");
+        ConsoleKey hasAutopilot = Console.ReadKey();
+        Console.WriteLine();
+
+        Console.Write("Чи військовий літак? (y-так, n-ні): ");
+        ConsoleKey isMilitary = Console.ReadKey();
+        Console.WriteLine();
+
+        Airplane plane = new Airplane();
+
+        plane.Name = name;
+        plane.Manufacturer = manufacturer;
+        plane.Capacity = int.Parse(capacity);
+        plane.Range = double.Parse(range);
+        plane.Speed = double.Parse(speed);
+        plane.HasAutopilot = hasAutopilot == ConsoleKey.Y ? true : false;
+        plane.IsMilitary = isMilitary == ConsoleKey.Y ? true : false;
+
+        double result = plane.GetRangePerPassenger();
+
+        Console.WriteLine("\n------------------------------");
+        Console.WriteLine("Дані про літак:");
+        Console.WriteLine("Назва: " + plane.Name);
+        Console.WriteLine("Виробник: " + plane.Manufacturer);
+        Console.WriteLine("Місткість: " + plane.Capacity);
+        Console.WriteLine("Дальність: " + plane.Range);
+        Console.WriteLine("Швидкість: " + plane.Speed);
+        Console.WriteLine(plane.HasAutopilot ? "Є автопілот" : "Немає автопілота");
+        Console.WriteLine(plane.IsMilitary ? "Військовий" : "Цивільний");
+
+        Console.WriteLine("\nСередня дальність на 1 пасажира: " + result.ToString("0.00"));
+
+        Console.ReadKey();
+    }
+}
