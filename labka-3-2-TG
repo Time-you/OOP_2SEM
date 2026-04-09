@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int isWordChar(int c)
+{
+    return isalpha(c) || isdigit(c) || c == '_';
+}
+
+int main()
+{
+    int c;
+    char word[1000];
+    int len = 0;
+
+    while ((c = getchar()) != EOF)
+    {
+        if (isWordChar(c))
+        {
+            word[len++] = c;
+        }
+        else
+        {
+            if (len > 0)
+            {
+                word[len] = '\0';
+
+                if (len == 3 && word[0] == 'i' && word[1] == 'n' && word[2] == 't')
+                    printf("long");
+                else
+                    printf("%s", word);
+
+                len = 0;
+            }
+
+            putchar(c);
+        }
+    }
+
+    if (len > 0)
+    {
+        word[len] = '\0';
+
+        if (len == 3 && word[0] == 'i' && word[1] == 'n' && word[2] == 't')
+            printf("long");
+        else
+            printf("%s", word);
+    }
+
+    return 0;
+}
