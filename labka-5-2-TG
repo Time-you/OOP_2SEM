@@ -1,0 +1,45 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+string dayToText(int day) {
+    string days[] = {
+        "", "Перше", "Друге", "Третє", "Четверте", "П'яте", "Шосте",
+        "Сьоме", "Восьме", "Дев'яте", "Десяте", "Одинадцяте",
+        "Дванадцяте", "Тринадцяте", "Чотирнадцяте", "П'ятнадцяте",
+        "Шістнадцяте", "Сімнадцяте", "Вісімнадцяте", "Дев'ятнадцяте",
+        "Двадцяте", "Двадцять перше", "Двадцять друге", "Двадцять третє",
+        "Двадцять четверте", "Двадцять п'яте", "Двадцять шосте",
+        "Двадцять сьоме", "Двадцять восьме", "Двадцять дев'яте",
+        "Тридцяте", "Тридцять перше"
+    };
+    return days[day];
+}
+
+string monthToText(int month) {
+    string months[] = {
+        "", "січня", "лютого", "березня", "квітня", "травня", "червня",
+        "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"
+    };
+    return months[month];
+}
+
+int main() {
+    int day, month;
+    char colon;
+
+    cout << "Enter date in format day:month : ";
+    cin >> day >> colon >> month;
+
+    if (colon != ':' || day < 1 || day > 31 || month < 1 || month > 12) {
+        cout << "Incorrect input" << endl;
+        return 1;
+    }
+
+    string result = dayToText(day) + " " + monthToText(month);
+
+    cout << result << endl;
+
+    return 0;
+}
