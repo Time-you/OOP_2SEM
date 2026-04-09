@@ -1,0 +1,51 @@
+#include <iostream>
+#include <fstream>
+#include <list>
+#include <algorithm>
+#include <iterator>
+
+using namespace std;
+
+int main() {
+    ifstream fin("input.txt");
+    if (!fin) {
+        cout << "File input.txt not found" << endl;
+        return 1;
+    }
+
+    list<double> numbers;
+    double x;
+
+    while (fin >> x) {
+        numbers.push_back(x);
+    }
+
+    fin.close();
+
+    if (numbers.empty()) {
+        cout << "File is empty" << endl;
+        return 1;
+    }
+
+    numbers.sort();
+
+    cout << "Numbers in sorted order:" << endl;
+    for (double num : numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    int count = 0;
+    double sum = 0;
+
+    for (auto it = numbers.rbegin(); it != numbers.rend() && count < 10; ++it) {
+        sum += *it;
+        count++;
+    }
+
+    double average = sum / count;
+
+    cout << "Average of " << count << " largest numbers = " << average << endl;
+
+    return 0;
+}
