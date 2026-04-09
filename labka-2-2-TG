@@ -1,0 +1,161 @@
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
+template <class T>
+class Matrix {
+private:
+    int n;
+    T** a;
+
+    void allocateMemory() {
+        a = new T*[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = new T[n];
+            for (int j = 0; j < n; j++) {
+                a[i][j] = 0;
+            }
+        }
+    }
+
+    void freeMemory() {
+        if (a != nullptr) {
+            for (int i = 0; i < n; i++) {
+                delete[] a[i];
+            }
+            delete[] a;
+        }
+        a = nullptr;
+    }
+
+public:
+    Matrix(int size = 2) {
+        n = size;
+        allocateMemory();
+    }
+
+    Matrix(const Matrix& other) {
+        n = other.n;
+        allocateMemory();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                a[i][j] = other.a[i][j];
+            }
+        }
+    }
+
+    ~Matrix() {
+        freeMemory();
+    }
+
+    Matrix& operator=(const Matrix& other) {
+        if (this != &other) {
+            freeMemory();
+            n = other.n;
+            allocateMemory();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    a[i][j] = other.a[i][j];
+                }
+            }
+        }
+        return *this;
+    }
+
+    void input() {
+        cout << "Vvedit elementy matrytsi " << n << "x" << n << ":\n";
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                cin >> a[i][j];
+            }
+        }
+    }
+
+    void print() const {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                cout << setw(8) << a[i][j];
+            }
+            cout << endl;
+        }
+    }
+
+    Matrix operator+(const Matrix& other) const {
+        Matrix result(n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                result.a[i][j] = a[i][j] + other.a[i][j];
+            }
+        }
+        return result;
+    }
+
+    Matrix operator*(const Matrix& other) const {
+        Matrix result(n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                result.a[i][j] = 0;
+                for (int k = 0; k < n; k++) {
+                    result.a[i][j] += a[i][k] * other.a[k][j];
+                }
+            }
+        }
+        return result;
+    }
+
+    Matrix transpose() const {
+        Matrix result(n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                result.a[j][i] = a[i][j];
+            }
+        }
+        return result;
+    }
+
+    T trace() const {
+        T sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += a[i][i];
+        }
+        return sum;
+    }
+};
+
+int main() {
+    int n;
+
+    cout << "Vvedit rozmir kvadratnoi matrytsi: ";
+    cin >> n;
+
+    Matrix<int> A(n), B(n);
+
+    cout << "\nMatrytsia A:\n";
+    A.input();
+
+    cout << "\nMatrytsia B:\n";
+    B.input();
+
+    cout << "\nMatrytsia A:\n";
+    A.print();
+
+    cout << "\nMatrytsia B:\n";
+    B.print();
+
+    Matrix<int> C = A + B;
+    cout << "\nA + B:\n";
+    C.print();
+
+    Matrix<int> D = A * B;
+    cout << "\nA * B:\n";
+    D.print();
+
+    Matrix<int> T = A.transpose();
+    cout << "\nTransponovana A:\n";
+    T.print();
+
+    cout << "\nSlid matrytsi A: " << A.trace() << endl;
+
+    return 0;
+}
