@@ -1,0 +1,117 @@
+using System;
+
+namespace AirplaneLibrary
+{
+    public class Airplane
+    {
+        public string Name;
+        public string Manufacturer;
+        public int Capacity;
+        public double Range;
+        public double Speed;
+        public bool HasAutopilot;
+        public bool IsMilitary;
+
+        public double GetRangePerPassenger()
+        {
+            if (Capacity == 0)
+                return 0;
+
+            return Range / Capacity;
+        }
+
+        public string GetInfo()
+        {
+            return "Назва: " + Name +
+                   "\nВиробник: " + Manufacturer +
+                   "\nМісткість: " + Capacity +
+                   "\nДальність польоту: " + Range +
+                   "\nШвидкість: " + Speed +
+                   "\nАвтопілот: " + (HasAutopilot ? "Так" : "Ні") +
+                   "\nТип: " + (IsMilitary ? "Військовий" : "Цивільний") +
+                   "\nДальність на 1 пасажира: " + GetRangePerPassenger().ToString("0.00");
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using System;
+using AirplaneLibrary;
+
+namespace Lab6
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            Console.Write("Введіть кількість літаків: ");
+            int n = int.Parse(Console.ReadLine());
+
+            Airplane[] planes = new Airplane[n];
+
+            for (int i = 0; i < n; i++)
+            {
+                Console.WriteLine("\nЛітак №" + (i + 1));
+
+                planes[i] = new Airplane();
+
+                Console.Write("Введіть назву літака: ");
+                planes[i].Name = Console.ReadLine();
+
+                Console.Write("Введіть виробника: ");
+                planes[i].Manufacturer = Console.ReadLine();
+
+                Console.Write("Введіть місткість: ");
+                planes[i].Capacity = int.Parse(Console.ReadLine());
+
+                Console.Write("Введіть дальність польоту (км): ");
+                planes[i].Range = double.Parse(Console.ReadLine());
+
+                Console.Write("Введіть швидкість (км/год): ");
+                planes[i].Speed = double.Parse(Console.ReadLine());
+
+                Console.Write("Чи є автопілот? (y/n): ");
+                ConsoleKey key1 = Console.ReadKey().Key;
+                Console.WriteLine();
+                planes[i].HasAutopilot = key1 == ConsoleKey.Y;
+
+                Console.Write("Чи військовий літак? (y/n): ");
+                ConsoleKey key2 = Console.ReadKey().Key;
+                Console.WriteLine();
+                planes[i].IsMilitary = key2 == ConsoleKey.Y;
+            }
+
+            Console.WriteLine("\n==============================");
+            Console.WriteLine("СПИСОК ЛІТАКІВ");
+            Console.WriteLine("==============================");
+
+            foreach (Airplane plane in planes)
+            {
+                Console.WriteLine(plane.GetInfo());
+                Console.WriteLine("------------------------------");
+            }
+
+            Console.ReadKey();
+        }
+    }
+}
