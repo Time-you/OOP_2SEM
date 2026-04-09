@@ -1,0 +1,138 @@
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+template <typename T>
+class Array {
+private:
+    T* data;
+    int size;
+
+public:
+    Array() {
+        size = 0;
+        data = nullptr;
+    }
+
+    Array(int n) {
+        size = n;
+        data = new T[size];
+    }
+
+    Array(const Array<T>& other) {
+        size = other.size;
+        data = new T[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = other.data[i];
+        }
+    }
+
+    ~Array() {
+        delete[] data;
+    }
+
+    Array<T>& operator=(const Array<T>& other) {
+        if (this != &other) {
+            delete[] data;
+            size = other.size;
+            data = new T[size];
+            for (int i = 0; i < size; i++) {
+                data[i] = other.data[i];
+            }
+        }
+        return *this;
+    }
+
+    void inputKeyboard() {
+        for (int i = 0; i < size; i++) {
+            cout << "data[" << i << "] = ";
+            cin >> data[i];
+        }
+    }
+
+    void inputFile(const char* filename) {
+        ifstream fin(filename);
+        if (!fin) {
+            cout << "Помилка відкриття файлу\n";
+            return;
+        }
+        for (int i = 0; i < size; i++) {
+            fin >> data[i];
+        }
+        fin.close();
+    }
+
+    void inputRandom(T minVal, T maxVal) {
+        for (int i = 0; i < size; i++) {
+            data[i] = minVal + (T)(rand()) / RAND_MAX * (maxVal - minVal);
+        }
+    }
+
+    void print() const {
+        for (int i = 0; i < size; i++) {
+            cout << data[i] << " ";
+        }
+        cout << endl;
+    }
+
+    int getSize() const {
+        return size;
+    }
+
+    T& operator[](int index) {
+        return data[index];
+    }
+
+    const T& operator[](int index) const {
+        return data[index];
+    }
+};
+
+int main() {
+    srand((unsigned)time(0));
+
+    int n;
+
+    cout << "Введіть розмір масиву int: ";
+    cin >> n;
+    Array<int> arrInt(n);
+
+    cout << "\nОберіть спосіб введення для int масиву:\n";
+    cout << "1 - з клавіатури\n2 - з файлу\n3 - випадково\n";
+    int choice;
+    cin >> choice;
+
+    if (choice == 1) {
+        arrInt.inputKeyboard();
+    } else if (choice == 2) {
+        arrInt.inputFile("int.txt");
+    } else if (choice == 3) {
+        arrInt.inputRandom(1, 100);
+    }
+
+    cout << "Масив int:\n";
+    arrInt.print();
+
+    cout << "\nВведіть розмір масиву double: ";
+    cin >> n;
+    Array<double> arrDouble(n);
+
+    cout << "\nОберіть спосіб введення для double масиву:\n";
+    cout << "1 - з клавіатури\n2 - з файлу\n3 - випадково\n";
+    cin >> choice;
+
+    if (choice == 1) {
+        arrDouble.inputKeyboard();
+    } else if (choice == 2) {
+        arrDouble.inputFile("double.txt");
+    } else if (choice == 3) {
+        arrDouble.inputRandom(0.0, 50.0);
+    }
+
+    cout << "Масив double:\n";
+    arrDouble.print();
+
+    return 0;
+}
