@@ -1,0 +1,101 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Stack {
+private:
+    struct Node {
+        char data;
+        Node* next;
+        Node(char d, Node* n = nullptr) : data(d), next(n) {}
+    };
+
+    Node* topNode;
+
+public:
+    Stack() : topNode(nullptr) {}
+
+    ~Stack() {
+        while (!isEmpty()) {
+            pop();
+        }
+    }
+
+    void push(char c) {
+        topNode = new Node(c, topNode);
+    }
+
+    void pop() {
+        if (topNode != nullptr) {
+            Node* temp = topNode;
+            topNode = topNode->next;
+            delete temp;
+        }
+    }
+
+    char top() const {
+        if (topNode != nullptr) {
+            return topNode->data;
+        }
+        return '\0';
+    }
+
+    bool isEmpty() const {
+        return topNode == nullptr;
+    }
+};
+
+bool isOpening(char c) {
+    return c == '(' || c == '[' || c == '{';
+}
+
+bool isClosing(char c) {
+    return c == ')' || c == ']' || c == '}';
+}
+
+bool isPair(char open, char close) {
+    return (open == '(' && close == ')') ||
+           (open == '[' && close == ']') ||
+           (open == '{' && close == '}');
+}
+
+bool checkBrackets(const string& expr) {
+    Stack st;
+
+    for (int i = 0; i < expr.length(); i++) {
+        char c = expr[i];
+
+        if (isOpening(c)) {
+            st.push(c);
+        } else if (isClosing(c)) {
+            if (st.isEmpty()) {
+                return false;
+            }
+
+            char open = st.top();
+            st.pop();
+
+            if (!isPair(open, c)) {
+                return false;
+            }
+        }
+    }
+
+    return st.isEmpty();
+}
+
+int main() {
+    string expr;
+
+    cout << "Vvedit вираз: ";
+    getline(cin, expr);
+
+    if (checkBrackets(expr)) {
+        cout << "Duzhki rozmishcheni pravilno." << endl;
+    } else {
+        cout << "Pomylka v rozmishchenni duzhok." << endl;
+    }
+
+    return 0;
+}
