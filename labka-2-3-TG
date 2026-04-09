@@ -1,0 +1,193 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stdexcept>
+
+using namespace std;
+
+class Transport {
+protected:
+    string name;
+    double speed;
+    double costPerKm;
+
+public:
+    Transport(string n, double s, double c) {
+        if (s <= 0 || c < 0) {
+            throw invalid_argument("Nekorektni parametry transportu");
+        }
+        name = n;
+        speed = s;
+        costPerKm = c;
+    }
+
+    virtual ~Transport() {}
+
+    string getName() const {
+        return name;
+    }
+
+    double getSpeed() const {
+        return speed;
+    }
+
+    double getCostPerKm() const {
+        return costPerKm;
+    }
+
+    void setSpeed(double s) {
+        if (s <= 0) {
+            throw invalid_argument("Shvydkist povynna buty bilsha za 0");
+        }
+        speed = s;
+    }
+
+    void setCostPerKm(double c) {
+        if (c < 0) {
+            throw invalid_argument("Vartist ne mozhe buty vidiemnoiu");
+        }
+        costPerKm = c;
+    }
+
+    virtual double calculateTime(double distance) const = 0;
+    virtual double calculateCost(double distance, double weight) const = 0;
+    virtual void show() const = 0;
+};
+
+class Car : public Transport {
+private:
+    int passengers;
+
+public:
+    Car(string n, double s, double c, int p) : Transport(n, s, c) {
+        if (p < 1) {
+            throw invalid_argument("Kilnist pasazhyriv povynna buty додатною");
+        }
+        passengers = p;
+    }
+
+    double calculateTime(double distance) const override {
+        if (distance < 0) {
+            throw invalid_argument("Vidstan ne mozhe buty vidiemnoiu");
+        }
+        return distance / speed;
+    }
+
+    double calculateCost(double distance, double weight) const override {
+        if (distance < 0 || weight < 0) {
+            throw invalid_argument("Nekorektni dani");
+        }
+        return distance * costPerKm + weight * 2.0;
+    }
+
+    void show() const override {
+        cout << "Avtomobil: " << name
+             << ", shvydkist = " << speed
+             << ", vartist/km = " << costPerKm
+             << ", pasazhyriv = " << passengers << endl;
+    }
+};
+
+class Bicycle : public Transport {
+private:
+    bool hasBasket;
+
+public:
+    Bicycle(string n, double s, double c, bool basket) : Transport(n, s, c) {
+        hasBasket = basket;
+    }
+
+    double calculateTime(double distance) const override {
+        if (distance < 0) {
+            throw invalid_argument("Vidstan ne mozhe buty vidiemnoiu");
+        }
+        return distance / speed;
+    }
+
+    double calculateCost(double distance, double weight) const override {
+        if (distance < 0 || weight < 0) {
+            throw invalid_argument("Nekorektni dani");
+        }
+        if (weight > 15 && !hasBasket) {
+            throw runtime_error("Velosyped bez koshyka ne mozhe vezty takyi vantazh");
+        }
+        return distance * costPerKm + weight * 0.5;
+    }
+
+    void show() const override {
+        cout << "Velosyped: " << name
+             << ", shvydkist = " << speed
+             << ", vartist/km = " << costPerKm
+             << ", koshyk = " << (hasBasket ? "ye" : "nemae") << endl;
+    }
+};
+
+class Cart : public Transport {
+private:
+    double maxLoad;
+
+public:
+    Cart(string n, double s, double c, double m) : Transport(n, s, c) {
+        if (m <= 0) {
+            throw invalid_argument("Maksymalne navantazhennia povynne buty bilshe za 0");
+        }
+        maxLoad = m;
+    }
+
+    double calculateTime(double distance) const override {
+        if (distance < 0) {
+            throw invalid_argument("Vidstan ne mozhe buty vidiemnoiu");
+        }
+        return distance / speed;
+    }
+
+    double calculateCost(double distance, double weight) const override {
+        if (distance < 0 || weight < 0) {
+            throw invalid_argument("Nekorektni dani");
+        }
+        if (weight > maxLoad) {
+            throw runtime_error("Vantazh perevyshchuie dopustyme navantazhennia voza");
+        }
+        return distance * costPerKm + weight * 1.0;
+    }
+
+    void show() const override {
+        cout << "Vizok: " << name
+             << ", shvydkist = " << speed
+             << ", vartist/km = " << costPerKm
+             << ", max vantazh = " << maxLoad << endl;
+    }
+};
+
+int main() {
+    try {
+        vector<Transport*> transports;
+
+        transports.push_back(new Car("Toyota", 80, 12, 4));
+        transports.push_back(new Bicycle("UkraineBike", 20, 3, true));
+        transports.push_back(new Cart("FarmCart", 12, 5, 200));
+
+        double distance = 50;
+        double weight = 30;
+
+        cout << "Vidstan: " << distance << " km\n";
+        cout << "Vantazh: " << weight << " kg\n\n";
+
+        for (size_t i = 0; i < transports.size(); i++) {
+            transports[i]->show();
+            cout << "Chas perevezennia: "
+                 << transports[i]->calculateTime(distance) << " god.\n";
+            cout << "Vartist perevezennia: "
+                 << transports[i]->calculateCost(distance, weight) << " grn.\n\n";
+        }
+
+        for (size_t i = 0; i < transports.size(); i++) {
+            delete transports[i];
+        }
+    }
+    catch (exception& e) {
+        cout << "Pomylka: " << e.what() << endl;
+    }
+
+    return 0;
+}
