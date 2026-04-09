@@ -1,0 +1,85 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <cctype>
+
+using namespace std;
+
+bool isLetter(char c) {
+    return isalpha((unsigned char)c);
+}
+
+bool isVowel(char c) {
+    c = tolower((unsigned char)c);
+    string vowels = "aeiouy";
+    return vowels.find(c) != string::npos;
+}
+
+string cleanWord(const string& word) {
+    string result;
+    for (char c : word) {
+        if (isLetter(c)) {
+            result += c;
+        }
+    }
+    return result;
+}
+
+int countVowels(const string& word) {
+    int count = 0;
+    for (char c : word) {
+        if (isVowel(c)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int main() {
+    string text;
+    cout << "Enter text: ";
+    getline(cin, text);
+
+    stringstream ss(text);
+    string word;
+    int wordCount = 0;
+    string bestWord = "";
+    int maxVowels = -1;
+
+    while (ss >> word) {
+        string cleaned = cleanWord(word);
+
+        if (!cleaned.empty()) {
+            wordCount++;
+
+            int vowels = countVowels(cleaned);
+            if (vowels > maxVowels) {
+                maxVowels = vowels;
+                bestWord = cleaned;
+            }
+        }
+    }
+
+    cout << "Number of words: " << wordCount << endl;
+    cout << "Word with the largest number of vowels: " << bestWord << endl;
+    cout << "Number of vowels in this word: " << maxVowels << endl;
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
