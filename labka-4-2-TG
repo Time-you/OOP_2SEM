@@ -1,0 +1,230 @@
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <string>
+
+using namespace std;
+
+struct PointValue {
+    double x;
+    double y;
+};
+
+double U1(double x) {
+    return atan(asin(sin(3.0 * x)));
+}
+
+double T1(double x) {
+    return atan(acos(sin(2.0 * x)));
+}
+
+bool loadTable(const char* filename, PointValue arr[], int& n) {
+    ifstream fin(filename);
+    if (!fin) return false;
+
+    n = 0;
+    while (fin >> arr[n].x >> arr[n].y) {
+        n++;
+    }
+    fin.close();
+    return n > 0;
+}
+
+double interpolate(PointValue arr[], int n, double x) {
+    for (int i = 0; i < n; i++) {
+        if (fabs(arr[i].x - x) < 1e-9) return arr[i].y;
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        if ((arr[i].x <= x && x <= arr[i + 1].x) || (arr[i].x >= x && x >= arr[i + 1].x)) {
+            return arr[i].y + (arr[i + 1].y - arr[i].y) * (x - arr[i].x) / (arr[i + 1].x - arr[i].x);
+        }
+    }
+
+    throw "Значення x поза межами таблиці";
+}
+
+double getUFromFile(double x) {
+    PointValue arr[100];
+    int n = 0;
+
+    if (!loadTable("dat1.dat", arr, n)) {
+        throw "Не вдалося відкрити файл dat1.dat";
+    }
+
+    if (fabs(x) > 5.0) {
+        throw "Аргумент для U(x) поза межами таблиці dat1.dat";
+    }
+
+    return interpolate(arr, n, x);
+}
+
+double getTFromFile(double x) {
+    PointValue arr[100];
+    int n = 0;
+
+    if (!loadTable("dat2.dat", arr, n)) {
+        throw "Не вдалося відкрити файл dat2.dat";
+    }
+
+    if (fabs(x) > 10.0) {
+        throw "Аргумент для T(x) поза межами таблиці dat2.dat";
+    }
+
+    return interpolate(arr, n, x);
+}
+
+double Gtext(const string& text) {
+    ifstream fin("dat3.dat");
+    if (!fin) {
+        throw "Не вдалося відкрити файл dat3.dat";
+    }
+
+    string word;
+    double value;
+    while (fin >> word >> value) {
+        if (word == text) {
+            fin.close();
+            return value;
+        }
+    }
+
+    fin.close();
+    return 0.0;
+}
+
+double Qqn_main(double x, double y, double z) {
+    return x / getUFromFile(x) + y * getTFromFile(y) - getUFromFile(z) * getTFromFile(z);
+}
+
+double Qnk_main(double x, double y) {
+    return Qqn_main(x, y, x + y) - Qqn_main(y, x, x - y);
+}
+
+double Qqn_alg2(double x, double y, double z) {
+    return x / U1(x) + y * T1(y) - U1(z) * T1(z);
+}
+
+double Qnk_alg2(double x, double y) {
+    return 1.1 * Qqn_alg2(x, y, x + y) - 9.0 * Qqn_alg2(y, x, x - y);
+}
+
+double Rnk_alg2(double x, double y) {
+    return x * Qnk_alg2(x, y) + y * Qnk_alg2(y, x) - 0.03 * Qnk_alg2(x, y) * Qnk_alg2(y, x);
+}
+
+double Qqn_alg3(double x, double y, double z) {
+    return x / U1(x) + y * T1(y) - 9.0 * U1(z) * T1(z);
+}
+
+double Qnk_alg3(double x, double y) {
+    return 3.1 * Qqn_alg3(x, y, x) - 7.0 * Qqn_alg3(y, x, x);
+}
+
+double func_alg3(double x, double y, double z) {
+    return 1.75 * x * Qnk_alg3(x, y) + 1.25 * y * Qnk_alg3(y, x) - 5.1 * Qnk_alg3(x, y) * Qnk_alg3(y, x);
+}
+
+double Rnk_main(double x, double y) {
+    try {
+        if (fabs(x) > 5.0 || fabs(y) > 10.0) {
+            return Rnk_alg2(x, y);
+        }
+        return x * Qnk_main(x, y) + y * Qnk_main(y, x);
+    } catch (...) {
+        return Rnk_alg2(x, y);
+    }
+}
+
+double func_main(double x, double y, double z) {
+    ifstream test("dat2.dat");
+    if (!test) {
+        return func_alg3(x, y, z);
+    }
+    test.close();
+
+    return Rnk_main(x, y) + Rnk_main(y, z) * Rnk_main(x, y);
+}
+
+double Max4(double a, double b, double c, double d) {
+    double m = a;
+    if (b > m) m = b;
+    if (c > m) m = c;
+    if (d > m) m = d;
+    return m;
+}
+
+double CText(double x, const string& text) {
+    if (x > 0) {
+        return Gtext(text);
+    } else if (fabs(x) < 1e-9 && text == "") {
+        return Gtext("set") - Gtext("get");
+    } else {
+        return Gtext("set") + Gtext(text);
+    }
+}
+
+double RText(double x, double y, double z, const string& text) {
+    return CText(Max4(x, y, x + z, y + z), text);
+}
+
+double Y(double x) {
+    if (x * x - 100.0 < 0.0) {
+        throw "Підлогарифмічний вираз x*x-100 менший за нуль";
+    }
+    if (x * x - 100.0 * x < 1.0) {
+        throw "Підлогарифмічний вираз x*x-100*x менший за 1";
+    }
+    return log(x * x - 100.0 * x);
+}
+
+double Yrr(double f, double r) {
+    return Y(f) * r + 0.5 * Y(r);
+}
+
+double Trr(double f, double r) {
+    if (f * f - 4.0 * r < 0.0) {
+        throw "Підкореневий вираз f*f-4*r менший за нуль";
+    }
+    return sqrt(f * f - 4.0 * r) + 0.5 * Yrr(r, f);
+}
+
+double Rrr(double f, double r, double k0) {
+    return f * Trr(f, r) + r * Trr(2.0 * f, k0);
+}
+
+double Variant(double r, double k) {
+    return 0.8973 * r + 0.1027 * k;
+}
+
+int main() {
+    double x, y, z;
+    string text;
+
+    cout << "Введіть x y z: ";
+    cin >> x >> y >> z;
+
+    cout << "Введіть text: ";
+    cin >> text;
+
+    double r = 0.0, k0 = 0.0, k = 0.0, result = 0.0;
+
+    try {
+        r = func_main(x, y, z);
+        k0 = RText(x, y, z, text);
+        k = Rrr(k0, r, k0);
+        result = Variant(r, k);
+
+        cout << "r = " << r << endl;
+        cout << "k = " << k << endl;
+        cout << "Variant(r, k) = " << result << endl;
+    }
+    catch (const char* msg) {
+        cout << "Помилка: " << msg << endl;
+    }
+    catch (...) {
+        cout << "Невідома помилка" << endl;
+    }
+
+    return 0;
+}
