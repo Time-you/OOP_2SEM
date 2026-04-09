@@ -1,0 +1,116 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <new>
+
+using namespace std;
+
+class Worker {
+private:
+    string surname;
+    string position;
+    int year;
+    double salary;
+
+public:
+    Worker() : surname(""), position(""), year(0), salary(0.0) {}
+
+    Worker(string s, string p, int y, double sal)
+        : surname(s), position(p), year(y), salary(sal) {}
+
+    friend istream& operator>>(istream& in, Worker& w) {
+        in >> w.surname >> w.position >> w.year >> w.salary;
+        return in;
+    }
+
+    friend ostream& operator<<(ostream& out, const Worker& w) {
+        out << w.surname << " "
+            << w.position << " "
+            << w.year << " "
+            << w.salary;
+        return out;
+    }
+
+    int getYear() const {
+        return year;
+    }
+
+    double getSalary() const {
+        return salary;
+    }
+};
+
+int main() {
+    try {
+        ifstream fin("workers.txt");
+        if (!fin.is_open()) {
+            throw runtime_error("Cannot open file workers.txt");
+        }
+
+        int n;
+        fin >> n;
+
+        if (fin.fail() || n <= 0) {
+            throw runtime_error("Incorrect number of workers in file");
+        }
+
+        Worker* workers = nullptr;
+
+        try {
+            workers = new Worker[n];
+        }
+        catch (bad_alloc&) {
+            throw runtime_error("Not enough memory for dynamic array");
+        }
+
+        for (int i = 0; i < n; i++) {
+            fin >> workers[i];
+            if (fin.fail()) {
+                delete[] workers;
+                throw runtime_error("Error while reading worker data from file");
+            }
+        }
+
+        fin.close();
+
+        ofstream fout("result.txt");
+        if (!fout.is_open()) {
+            delete[] workers;
+            throw runtime_error("Cannot open file result.txt");
+        }
+
+        fout << "All workers:" << endl;
+        for (int i = 0; i < n; i++) {
+            fout << workers[i] << endl;
+        }
+
+        fout << endl;
+        fout << "Workers hired after 2015:" << endl;
+        for (int i = 0; i < n; i++) {
+            if (workers[i].getYear() > 2015) {
+                fout << workers[i] << endl;
+            }
+        }
+
+        fout << endl;
+        fout << "Workers with salary more than 15000:" << endl;
+        for (int i = 0; i < n; i++) {
+            if (workers[i].getSalary() > 15000) {
+                fout << workers[i] << endl;
+            }
+        }
+
+        fout.close();
+        delete[] workers;
+
+        cout << "Data has been written to result.txt" << endl;
+    }
+    catch (exception& e) {
+        cerr << "Error: " << e.what() << endl;
+    }
+    catch (...) {
+        cerr << "Unknown error" << endl;
+    }
+
+    return 0;
+}
